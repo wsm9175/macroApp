@@ -18,6 +18,7 @@ import android.widget.Switch;
 
 import com.example.android.autoclick.R;
 import com.example.android.autoclick.service.AutoService;
+//import com.example.android.autoclick.service.AutoService;
 
 public class FloatingView extends Service implements View.OnClickListener {
     private WindowManager mWindowManager;
@@ -116,7 +117,6 @@ public class FloatingView extends Service implements View.OnClickListener {
                 if (isChecked) {
                     Log.d("START", "THIS IS STARTED");
                     Point size = getCoordinates();
-
                     intent.putExtra("switch", true);
                     //터치 좌표
                     intent.putExtra("x", size.x / 2);
@@ -124,6 +124,7 @@ public class FloatingView extends Service implements View.OnClickListener {
 
                 } else {
                     Log.d("START", "THIS IS STOP");
+                    intent.putExtra("count",0);
                     intent.putExtra("switch", false);
                 }
                 getApplication().startService(intent);
@@ -152,4 +153,5 @@ public class FloatingView extends Service implements View.OnClickListener {
         Log.d("FloatingView", ">>> size.x : " + size.x + ", size.y : " + size.y);
         return size;
     }
+
 }

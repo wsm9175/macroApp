@@ -9,12 +9,16 @@ import android.os.HandlerThread;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 
+import com.example.android.autoclick.view.FloatingView;
+
 public class AutoService extends AccessibilityService {
     private final String TAG = AutoService.class.getSimpleName();
     private boolean isOn;
     private Handler mHandler;
     private int mX;
     private int mY;
+    private FloatingView floatingView;
+    private static int count =0;
 
     @Override
     public void onCreate() {
@@ -29,41 +33,39 @@ public class AutoService extends AccessibilityService {
       service의 onAccessibilityEvent가 view의 이벤트를 계속 감지하고 있는데 스위치가 ON이고
       view touch라면 지정된 좌표 터치 실행*/
     //touch를 감지하는 메서드
-
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
-//        Log.d(TAG, "onAccessibilityEvent");
-//        Log.d(TAG, event.toString());
-//        Log.d(TAG, "event.getAction() :" + event.getEventType());
-//        Log.d(TAG, "ccessibilityEvent.TYPE_VIEW_CLICKED : " + AccessibilityEvent.TYPE_VIEW_CLICKED);
-//        Log.d(TAG, "isOn : " + isOn);
+        Log.d(TAG, "onAccessibilityEvent");
+        Log.d(TAG, String.valueOf(event.getEventType()));
+        Log.d(TAG, "event.getAction() :" + event.getAction());
+        Log.d(TAG, "ccessibilityEvent.TYPE_VIEW_CLICKED : " + AccessibilityEvent.TYPE_VIEW_CLICKED);
+        Log.d(TAG, "isOn : " + isOn);
         // view click이 감지 되었다면
-        if(event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED || event.getEventType() == AccessibilityEvent.TYPE_WINDOWS_CHANGED || event.getEventType() == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED){
-            Log.d(TAG, "stop");
-            if (mRunnable != null) {
-
-            }
-            mHandler.removeCallbacks(mRunnable);
-        }else if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_CLICKED && isOn) {
-            Log.d(TAG, "TYPE_VIEW_CLICKED");
+        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_CLICKED && isOn) {
+//        if (isOn) {
+            Log.d(TAG, "실행완료");
             if (mRunnable == null) {
                 mRunnable = new IntervalRunnable();
             }
 //                playTap(mX,mY);
 //                mHandler.postDelayed(mRunnable, 1000);
             //터치 실행
+            count++;
             mHandler.post(mRunnable);
+        }else if(event.getEventType() == AccessibilityEvent.TYPE_WINDOWS_CHANGED || event.getEventType() == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED|| event.getEventType() ==  AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED ) {
+            Log.d(TAG, event.toString());
         }
     }
 
+
     @Override
     public void onInterrupt() {
-        Log.d(TAG, "onInterrupt");
     }
+
 
     @Override
     protected void onServiceConnected() {
-        Log.d(TAG, "onServiceConnected");
+
     }
 
     @Override
@@ -79,6 +81,7 @@ public class AutoService extends AccessibilityService {
                 this.mY = intent.getIntExtra("y", 0);
 
             } else {
+                this.count=intent.getIntExtra("count", 0);
                 Log.d("Service", "onStartCommand OFF");
                 mHandler.removeCallbacksAndMessages(null);
             }
@@ -101,10 +104,10 @@ public class AutoService extends AccessibilityService {
         boolean flag = dispatchGesture(gestureBuilder.addStroke(new GestureDescription.StrokeDescription(swipePath, 0, 10)).build(), new GestureResultCallback() {
             @Override
             public void onCompleted(GestureDescription gestureDescription) {
-//                Log.d("Gesture Completed", "Gesture Completed");
+                Log.d("Gesture Completed", "Gesture Completed");
                 super.onCompleted(gestureDescription);
                 //mHandler.postDelayed(mRunnable, 1);
-//                Log.d(TAG, "gesture complete");
+                Log.d(TAG, "gesture complete");
 //                mHandler.post(mRunnable);
             }
 
@@ -112,10 +115,10 @@ public class AutoService extends AccessibilityService {
             public void onCancelled(GestureDescription gestureDescription) {
                 //Log.d("Gesture Cancelled","Gesture Cancelled");
                 super.onCancelled(gestureDescription);
-//                Log.d(TAG, "gesture canceled");
+                Log.d(TAG, "gesture canceled");
             }
         }, null);
-//        Log.d("FLAG", String.valueOf(flag));
+        Log.d("FLAG", String.valueOf(flag));
     }
 
 
@@ -126,12 +129,16 @@ public class AutoService extends AccessibilityService {
         public void run() {
             Log.d("clicked", "click");
             try {
-                Thread.sleep(350);
-                playTap(mX, mY);
+                if(count==1){
+                    Thread.sleep(350);
+                    playTap(mX, mY);
+                }
+                else{
+                    count=0;
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
-
     }
 }
