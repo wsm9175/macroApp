@@ -38,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private final String TAG = MainActivity.class.getSimpleName();
     private static final int SYSTEM_ALERT_WINDOW_PERMISSION = 2084;
 
+    private final String USER = "user";
     private final String DATE = "date";
     private final String LOCATION = "location";
 
@@ -105,22 +106,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         FirebaseUser user = mAuth.getCurrentUser();
 
         DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
-        Log.d(TAG, user.getUid());
-        mDatabase.child("UserDate").child(user.getUid()).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DataSnapshot> task) {
-                if (task.isSuccessful()) {
-                    Log.d(TAG, "task isSuccessful");
-                    Log.d(TAG, String.valueOf(task.getResult().getValue()));
-                    User mUser = task.getResult().getValue(User.class);
-                }else{
-                    Log.d(TAG, "task failed");
-                    task.getException().printStackTrace();
-                }
+        Log.d(TAG, mDatabase + " "+user.getUid());
+        mDatabase.child(USER).child(user.getUid()).get().addOnCompleteListener(task -> {
+            Log.d(TAG, String.valueOf(task.isSuccessful()));
+            if (task.isSuccessful()) {
+                Log.d(TAG, "task isSuccessful");
+                Log.d(TAG, String.valueOf(task.getResult().getValue()));
+                User mUser = task.getResult().getValue(User.class);
+            }else{
+                Log.d(TAG, "task failed");
+                task.getException().printStackTrace();
             }
         });
-
-
     }
 
     // 접근성 및 다른 앱 위에 표시 권한을 체크. 모든 권한이 부여돼있다면 flattingView display
