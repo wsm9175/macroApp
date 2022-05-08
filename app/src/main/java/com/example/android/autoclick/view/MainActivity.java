@@ -1,5 +1,6 @@
 package com.example.android.autoclick.view;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
@@ -17,6 +18,18 @@ import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
 
 import com.example.android.autoclick.R;
+import com.example.android.autoclick.model.User;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
 
@@ -24,6 +37,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //FrameLayout mLayout;
     private final String TAG = MainActivity.class.getSimpleName();
     private static final int SYSTEM_ALERT_WINDOW_PERMISSION = 2084;
+
+    private final String DATE = "date";
+    private final String LOCATION = "location";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +55,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Toast.makeText(this, "이 앱을 이용하기 위해선 접근성 권한이 필요합니다.", Toast.LENGTH_SHORT).show();
         }
         findViewById(R.id.startFloat).setOnClickListener(this);
+
+        getRemainingDate();
     }
 
 
@@ -50,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     // 접근성 권한이 있는지 없는지 확인하는 부분
     // 있으면 true, 없으면 false
-    public boolean checkAccessibilityPermissions() {
+    private boolean checkAccessibilityPermissions() {
         AccessibilityManager accessibilityManager = (AccessibilityManager) getSystemService(Context.ACCESSIBILITY_SERVICE);
 
         // getEnabledAccessibilityServiceList는 현재 접근성 권한을 가진 리스트를 가져오게 된다
@@ -68,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     // 접근성 설정화면으로 넘겨주는 부분
-    public void setAccessibilityPermissions() {
+    private void setAccessibilityPermissions() {
         AlertDialog.Builder gsDialog = new AlertDialog.Builder(this);
         gsDialog.setTitle("접근성 권한 설정");
         gsDialog.setMessage("접근성 권한을 필요로 합니다");
@@ -79,6 +97,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 return;
             }
         }).create().show();
+    }
+
+    // 결제 남은 날짜를 계산
+    private void getRemainingDate() {
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        FirebaseUser user = mAuth.getCurrentUser();
+
+        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
+        Log.d(TAG, user.getUid());
+        mDatabase.child("UserDate").child(user.getUid()).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DataSnapshot> task) {
+                if (task.isSuccessful()) {
+                    Log.d(TAG, "task isSuccessful");
+                    Log.d(TAG, String.valueOf(task.getResult().getValue()));
+                    User mUser = task.getResult().getValue(User.class);
+                }else{
+                    Log.d(TAG, "task failed");
+                    task.getException().printStackTrace();
+                }
+            }
+        });
+
+
     }
 
     // 접근성 및 다른 앱 위에 표시 권한을 체크. 모든 권한이 부여돼있다면 flattingView display
