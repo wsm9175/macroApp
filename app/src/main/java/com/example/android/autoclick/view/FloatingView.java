@@ -118,7 +118,9 @@ public class FloatingView extends Service implements View.OnClickListener {
                     Log.d("START", "THIS IS STARTED");
                     Point size = getCoordinates();
                     intent.putExtra("switch", true);
+                    intent.putExtra("count",1);
                     //터치 좌표
+
                     intent.putExtra("x", size.x / 2);
                     intent.putExtra("y", size.y - 30);
 

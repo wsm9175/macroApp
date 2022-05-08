@@ -77,6 +77,7 @@ public class AutoService extends AccessibilityService {
             this.isOn = intent.getBooleanExtra("switch", false);
             if (isOn) {
                 Log.d("Service", "onStartCommand On");
+                this.count=intent.getIntExtra("count", 1);
                 this.mX = intent.getIntExtra("x", 0);
                 this.mY = intent.getIntExtra("y", 0);
 
@@ -129,12 +130,12 @@ public class AutoService extends AccessibilityService {
         public void run() {
             Log.d("clicked", "click");
             try {
-                if(count==1){
+                if(count==2){
                     Thread.sleep(350);
                     playTap(mX, mY);
                 }
                 else{
-                    count=0;
+                    count=1;
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
