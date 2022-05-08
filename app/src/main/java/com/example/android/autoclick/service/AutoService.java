@@ -40,9 +40,10 @@ public class AutoService extends AccessibilityService {
         Log.d(TAG, "event.getAction() :" + event.getAction());
         Log.d(TAG, "AccessibilityEvent.TYPE_VIEW_CLICKED : " + AccessibilityEvent.TYPE_VIEW_CLICKED);
         Log.d(TAG, "isOn : " + isOn);
+//        Log.d(TAG,"PackageName"+event.getPackageName().equals("com.example.android"));
 
         // view click이 감지 되었다면
-        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_CLICKED && isOn) {
+        if ((event.getPackageName()==null||!event.getPackageName().equals("com.example.android"))&&event.getEventType() == AccessibilityEvent.TYPE_VIEW_CLICKED && isOn) {
 //        if (isOn) {
             Log.d(TAG, "실행완료");
             if (mRunnable == null) {

@@ -1,16 +1,16 @@
 package com.example.android.autoclick.model;
 
 public class User {
-    private Long date;
+    private String date;
     private String location;
 
     public User(){}
 
-    public Long getDate() {
+    public String getDate() {
         return date;
     }
 
-    public void setDate(Long date) {
+    public void setDate(String date) {
         this.date = date;
     }
 

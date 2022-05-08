@@ -15,6 +15,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.autoclick.R;
@@ -31,12 +32,15 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.GregorianCalendar;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     //FrameLayout mLayout;
     private final String TAG = MainActivity.class.getSimpleName();
     private static final int SYSTEM_ALERT_WINDOW_PERMISSION = 2084;
+    private static int interval=0;
+    private static TextView txt_date;
 
     private final String USER = "user";
     private final String DATE = "date";
@@ -46,6 +50,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        txt_date = findViewById(R.id.txt_date);
+        getRemainingDate();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
             Toast.makeText(this, "이 앱을 이용하기 위해선 다른 앱 위에 표시 권한이 필요합니다.", Toast.LENGTH_SHORT).show();
@@ -57,7 +63,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         findViewById(R.id.startFloat).setOnClickListener(this);
 
-        getRemainingDate();
     }
 
 
@@ -104,15 +109,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void getRemainingDate() {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         FirebaseUser user = mAuth.getCurrentUser();
-
-        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
+//        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference("user");
+        DatabaseReference mDatabase = FirebaseDatabase.getInstance("https://quickjob-c9ee7-default-rtdb.asia-southeast1.firebasedatabase.app").getReference("user");
         Log.d(TAG, mDatabase + " "+user.getUid());
-        mDatabase.child(USER).child(user.getUid()).get().addOnCompleteListener(task -> {
+        mDatabase.child(user.getUid()).get().addOnCompleteListener(task -> {
             Log.d(TAG, String.valueOf(task.isSuccessful()));
             if (task.isSuccessful()) {
                 Log.d(TAG, "task isSuccessful");
                 Log.d(TAG, String.valueOf(task.getResult().getValue()));
                 User mUser = task.getResult().getValue(User.class);
+                String mday = mUser.getDate();
+                String[] mdaylist = mday.split("-");
+//                int first = mday.indexOf("-");
+//                int last = mday.indexOf("-");
+                int year = Integer.parseInt(mdaylist[0]);
+                int month = Integer.parseInt(mdaylist[1]);
+                int day = Integer.parseInt(mdaylist[2]);
+                GregorianCalendar cal = new GregorianCalendar();
+                long currentTime = cal.getTimeInMillis()/(1000*60*60*24);
+                cal.set(year,month-1,day);
+                long birthTime = cal.getTimeInMillis()/(1000*60*60*24);
+                interval =(int)(birthTime-currentTime);
+                txt_date.setText(String.valueOf(interval));
             }else{
                 Log.d(TAG, "task failed");
                 task.getException().printStackTrace();
