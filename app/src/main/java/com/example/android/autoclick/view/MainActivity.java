@@ -229,7 +229,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 if(mandroid.equals("")){
                     mDatabase.child(user.getUid()).child("android").setValue(android);
-                }else{
+                }else if(!mandroid.equals(android)){
                     Toast.makeText(getApplicationContext(), "중복로그인으로 이용을 제한합니다.",Toast.LENGTH_SHORT).show();
                     shutDown();
                 }
@@ -282,8 +282,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void shutDown(){
-        moveTaskToBack(true);						// 태스크를 백그라운드로 이동
-        finishAndRemoveTask();						// 액티비티 종료 + 태스크 리스트에서 지우기
+        moveTaskToBack(true);                  // 태스크를 백그라운드로 이동
+        finishAndRemoveTask();                  // 액티비티 종료 + 태스크 리스트에서 지우기
         android.os.Process.killProcess(android.os.Process.myPid());
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        getApplication().stopService(intent);
     }
 }

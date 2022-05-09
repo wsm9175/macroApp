@@ -31,6 +31,7 @@
             android:showText="true"
             android:switchMinWidth="40.5sp"
             android:textOff="OFF"
+            android:longClickable="true"
             android:textOn="ON" />
     </LinearLayout>
 

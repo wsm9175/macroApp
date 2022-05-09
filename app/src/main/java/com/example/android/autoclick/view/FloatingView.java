@@ -114,19 +114,19 @@ public class FloatingView extends Service implements View.OnClickListener {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
                 Intent intent = new Intent(getApplicationContext(), AutoService.class);
+                Log.d(TAG, "drag");
                 if (isChecked) {
                     Log.d("START", "THIS IS STARTED");
                     Point size = getCoordinates();
                     intent.putExtra("switch", true);
-                    intent.putExtra("count",1);
+                    intent.putExtra("count", 1);
                     //터치 좌표
-
                     intent.putExtra("x", size.x / 2);
                     intent.putExtra("y", size.y - 30);
 
                 } else {
                     Log.d("START", "THIS IS STOP");
-                    intent.putExtra("count",0);
+                    intent.putExtra("count", 0);
                     intent.putExtra("switch", false);
                 }
                 getApplication().startService(intent);
