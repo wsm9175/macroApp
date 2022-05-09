@@ -11,6 +11,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 
 import com.example.android.autoclick.model.User;
+import com.example.android.autoclick.view.FloatingView;
+import com.example.android.autoclick.view.MainActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
@@ -141,6 +143,7 @@ public class DateReceiver extends BroadcastReceiver {
     private void shutDown() {
         mActivity.moveTaskToBack(true);                        // 태스크를 백그라운드로 이동
         mActivity.finishAndRemoveTask();                        // 액티비티 종료 + 태스크 리스트에서 지우기
+        mActivity.stopService(new Intent(mActivity, FloatingView.class));
         android.os.Process.killProcess(android.os.Process.myPid());
 
     }

@@ -25,14 +25,12 @@
             android:layout_weight="1" />
 
         <Switch
-            android:longClickable="true"
             android:id="@+id/onoff"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:showText="true"
             android:switchMinWidth="40.5sp"
             android:textOff="OFF"
-            android:longClickable="true"
             android:textOn="ON" />
     </LinearLayout>
 
