@@ -25,7 +25,6 @@ public class FloatingView extends Service implements View.OnClickListener {
     private final String TAG = FloatingView.class.getSimpleName();
     private WindowManager mWindowManager;
     private View myFloatingView;
-    private Button exitButton;
     private Switch aSwitch;
 
     @Override
@@ -103,13 +102,16 @@ public class FloatingView extends Service implements View.OnClickListener {
 //        stopButton = (Button) myFloatingView.findViewById(R.id.stop);
 //        stopButton.setOnClickListener(this);
 
-        exitButton = myFloatingView.findViewById(R.id.btn_exit);
-        exitButton.setOnClickListener(this);
         aSwitch = myFloatingView.findViewById(R.id.onoff);
 
           /*버튼 클릭시 FloatingView switch ON/OFF-> service intent -> autoService에서 스위치 ON/OFF 설정/
       service의 onAccessibilityEvent가 view의 이벤트를 계속 감지하고 있는데 스위치가 ON이고
       view touch라면 지정된 좌표 터치 실행*/
+        aSwitch.setOnLongClickListener(view -> {
+            stopSelf();
+            System.exit(0);
+            return false;
+        });
         aSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {

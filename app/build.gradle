@@ -17,9 +17,15 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+        applicationVariants.all { variant ->
+            variant.outputs.all { def name = parent.project.getName()
+                def buildType = variant.buildType.name
+                def versionName = variant.versionName
+                outputFileName = "quickJob-${buildType}-${versionName}.apk" } }
     }
 
     dataBinding {
