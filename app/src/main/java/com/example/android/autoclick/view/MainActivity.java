@@ -70,6 +70,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        String idByANDROID_ID = Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+
 
         dateReceiver = new DateReceiver();
         dateReceiver.setActivity(this);
@@ -123,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             shutDown();
         }
 
-        compareVersion();
+        compareVersion(idByANDROID_ID);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
             Toast.makeText(this, "이 앱을 이용하기 위해선 다른 앱 위에 표시 권한이 필요합니다.", Toast.LENGTH_SHORT).show();
@@ -184,7 +186,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }).create().show();
     }
 
-    private void compareVersion(){
+    private void compareVersion(String android){
         isLoading.setValue(true);
         DatabaseReference mDatabase = FirebaseDatabase.getInstance(REF).getReference(APPVERSION);
         mDatabase.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
@@ -197,7 +199,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Toast.makeText(getApplicationContext(), "앱을 최신버전으로 업데이트 해주세요",Toast.LENGTH_SHORT).show();
                         shutDown();
                     }else{
-                        getRemainingDate();
+                        getRemainingDate(android);
                     }
                 }else{
                     Toast.makeText(getApplicationContext(), "server connection error",Toast.LENGTH_SHORT).show();
@@ -208,7 +210,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     // 결제 남은 날짜를 계산
-    private void getRemainingDate() {
+    private void getRemainingDate(String android) {
         DatabaseReference mDatabase = FirebaseDatabase.getInstance(REF).getReference(USER);
         Log.d(TAG, mDatabase + " " + user.getUid());
         mDatabase.child(user.getUid()).get().addOnCompleteListener(task -> {
@@ -218,9 +220,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.d(TAG, String.valueOf(task.getResult().getValue()));
                 User mUser = task.getResult().getValue(User.class);
                 String mday = mUser.getDate();
+                String mandroid = mUser.getAndroid();
                 boolean isLimit = mUser.isLimit();
                 if(isLimit){
                     Toast.makeText(getApplicationContext(), "부정 이용으로 이용이 제한된 계정입니다.",Toast.LENGTH_SHORT).show();
+                    shutDown();
+                }
+
+                if(mandroid.equals("")){
+                    mDatabase.child(user.getUid()).child("android").setValue(android);
+                }else{
+                    Toast.makeText(getApplicationContext(), "중복로그인으로 이용을 제한합니다.",Toast.LENGTH_SHORT).show();
                     shutDown();
                 }
 
