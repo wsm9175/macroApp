@@ -132,14 +132,6 @@ public class FloatingView extends Service implements View.OnClickListener {
                 getApplication().startService(intent);
             }
         });
-
-//        aSwitch.setOnLongClickListener(new View.OnLongClickListener() {
-//            @Override
-//            public boolean onLongClick(View view) {
-//
-//            }
-//        });
-
     }
 
     @Override
