@@ -3,6 +3,7 @@ package com.example.android.autoclick.model;
 public class User {
     private String date;
     private String location;
+    private boolean isLimit;
 
     public User(){}
 
@@ -20,5 +21,13 @@ public class User {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public boolean isLimit() {
+        return isLimit;
+    }
+
+    public void setLimit(boolean limit) {
+        isLimit = limit;
     }
 }

@@ -16,11 +16,13 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 
+import com.example.android.autoclick.DateReceiver;
 import com.example.android.autoclick.R;
 import com.example.android.autoclick.service.AutoService;
 //import com.example.android.autoclick.service.AutoService;
 
 public class FloatingView extends Service implements View.OnClickListener {
+    private final String TAG = FloatingView.class.getSimpleName();
     private WindowManager mWindowManager;
     private View myFloatingView;
     private Button exitButton;
@@ -44,9 +46,7 @@ public class FloatingView extends Service implements View.OnClickListener {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             layout_parms = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         } else {
-
             layout_parms = WindowManager.LayoutParams.TYPE_PHONE;
-
         }
 
         //setting the layout parameters
@@ -132,6 +132,13 @@ public class FloatingView extends Service implements View.OnClickListener {
                 getApplication().startService(intent);
             }
         });
+
+//        aSwitch.setOnLongClickListener(new View.OnLongClickListener() {
+//            @Override
+//            public boolean onLongClick(View view) {
+//
+//            }
+//        });
 
     }
 

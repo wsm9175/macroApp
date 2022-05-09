@@ -10,37 +10,41 @@
         android:label="퀵잡"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.DayNight">
+        <receiver
+            android:name=".DateReceiver"
+            android:enabled="true"
+            android:exported="true"></receiver>
 
         <activity
             android:name=".view.LoginActivity"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name="com.example.android.autoclick.view.MainActivity"
-            android:exported="true">
-        </activity>
+        <activity
+            android:name=".view.MainActivity"
+            android:exported="true"></activity>
 
         <service
-            android:name="com.example.android.autoclick.view.FloatingView"
+            android:name=".view.FloatingView"
             android:enabled="true"
             android:exported="true" />
-
         <service
-            android:name="com.example.android.autoclick.service.AutoService"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
-            android:exported="true">
+            android:name=".service.AutoService"
+            android:exported="true"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
+
             <meta-data
                 android:name="android.accessibilityservice"
                 android:resource="@xml/global_action_bar_service" />
         </service>
+
     </application>
 
 </manifest>

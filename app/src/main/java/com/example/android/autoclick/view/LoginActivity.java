@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.android.autoclick.DateReceiver;
 import com.example.android.autoclick.R;
 import com.example.android.autoclick.databinding.ActivityLoginBinding;
 import com.example.android.autoclick.util.Util;
