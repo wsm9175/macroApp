@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "145740754447",
+    "firebase_url": "https://quickjob-c9ee7-default-rtdb.asia-southeast1.firebasedatabase.app",
     "project_id": "quickjob-c9ee7",
     "storage_bucket": "quickjob-c9ee7.appspot.com"
   },
@@ -19,6 +20,14 @@
           "android_info": {
             "package_name": "com.example.android.autoclick",
             "certificate_hash": "c8dc673fc6af246e73fff26fb5d97cc542fa28c0"
+          }
+        },
+        {
+          "client_id": "145740754447-evc9jvtctont1lveai8090mhm6ann6jr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.android.autoclick",
+            "certificate_hash": "6c81d23b0530c7c41a375c3648a1ad0bdc0e748e"
           }
         },
         {

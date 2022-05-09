@@ -11,12 +11,16 @@ import android.view.accessibility.AccessibilityEvent;
 
 import com.example.android.autoclick.view.FloatingView;
 
+import java.util.Random;
+
 public class AutoService extends AccessibilityService {
     private final String TAG = AutoService.class.getSimpleName();
     private boolean isOn;
     private Handler mHandler;
-    private int mX;
-    private int mY;
+    private int minX;
+    private int maxX;
+    private int minY;
+    private int maxY;
     private FloatingView floatingView;
     private static int count =0;
 
@@ -82,8 +86,10 @@ public class AutoService extends AccessibilityService {
             if (isOn) {
                 Log.d("Service", "onStartCommand On");
                 this.count=intent.getIntExtra("count", 1);
-                this.mX = intent.getIntExtra("x", 0);
-                this.mY = intent.getIntExtra("y", 0);
+                this.minX = intent.getIntExtra("minX", 0);
+                this.maxX = intent.getIntExtra("maxX", 0);
+                this.minY = intent.getIntExtra("minY", 0);
+                this.maxY = intent.getIntExtra("maxY", 0);
 
             } else {
                 this.count=intent.getIntExtra("count", 0);
@@ -96,7 +102,7 @@ public class AutoService extends AccessibilityService {
     }
 
     //@RequiresApi(api = Build.VERSION_CODES.N)
-    private void playTap(int x, int y) {
+    private void playTap(float x, float y) {
         //Log.d("TAPPED","STARTED TAPpING");
         Path swipePath = new Path();
         swipePath.moveTo(x, y);
@@ -136,7 +142,11 @@ public class AutoService extends AccessibilityService {
             try {
                 if(count==2){
                     Thread.sleep(350);
-                    playTap(mX, mY);
+                    float touchX = new Random().nextFloat() * (maxX - minX+1) + minX;
+                    float touchY = new Random().nextFloat() * (maxY - minY+1) + minY;
+                    Log.d(TAG, "touchX : " + touchX);
+                    Log.d(TAG, "touchY : " + touchY);
+                    playTap(touchX, touchY);
                 }
                 else{
                     count=1;

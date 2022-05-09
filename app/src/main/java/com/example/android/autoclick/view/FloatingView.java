@@ -123,8 +123,10 @@ public class FloatingView extends Service implements View.OnClickListener {
                     intent.putExtra("switch", true);
                     intent.putExtra("count", 1);
                     //터치 좌표
-                    intent.putExtra("x", size.x / 2);
-                    intent.putExtra("y", size.y - 30);
+                    intent.putExtra("minX", 100);
+                    intent.putExtra("maxX", size.x-100);
+                    intent.putExtra("minY", size.y - 10);
+                    intent.putExtra("maxY", size.y - 35);
 
                 } else {
                     Log.d("START", "THIS IS STOP");

@@ -30,6 +30,7 @@ import com.example.android.autoclick.DateReceiver;
 import com.example.android.autoclick.NetworkUtil;
 import com.example.android.autoclick.R;
 import com.example.android.autoclick.model.User;
+import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -38,8 +39,12 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     //FrameLayout mLayout;
@@ -51,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView txt_date;
     private TextView txt_id;
     private Button startButton;
+    private Button logOutButton;
     private ProgressBar progressBar;
 
     private PackageInfo pInfo = null;
@@ -66,6 +72,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private final String DATE = "date";
     private final String LOCATION = "location";
 
+    public static String format_yyyyMMdd_HHmmss = "yyyyMMdd_hhmmss";
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,6 +88,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         txt_date = findViewById(R.id.txt_date);
         txt_id = findViewById(R.id.txt_id);
         startButton = findViewById(R.id.startFloat);
+        logOutButton = findViewById(R.id.btn_logout);
 
         startButton.setOnClickListener(this);
 
@@ -97,22 +107,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (isLoading.getValue()) {
                 this.progressBar.setVisibility(View.VISIBLE);
                 this.startButton.setVisibility(View.INVISIBLE);
-            }else{
+            } else {
                 this.progressBar.setVisibility(View.INVISIBLE);
                 this.startButton.setVisibility(View.VISIBLE);
             }
         });
 
         Log.d(TAG, String.valueOf(NetworkUtil.getConnectivityStatus(getApplicationContext())));
-        if(NetworkUtil.getConnectivityStatus(getApplicationContext()) == 0){
-            Toast.makeText(this, "네트워크 연결 후 앱을 재시작 해주세요.",Toast.LENGTH_LONG).show();
+        if (NetworkUtil.getConnectivityStatus(getApplicationContext()) == 0) {
+            Toast.makeText(this, "네트워크 연결 후 앱을 재시작 해주세요.", Toast.LENGTH_LONG).show();
         }
 
         // 패키지 정보를 받아와 서버의 앱 버전과 비교. 버전 불일치시 업데이트 요청 후 종료
         try {
             pInfo = getApplication().getPackageManager().getPackageInfo(getApplicationContext().getPackageName(), PackageManager.GET_META_DATA);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-              myVersionCode = (int) pInfo.getLongVersionCode();
+                myVersionCode = (int) pInfo.getLongVersionCode();
             }
             myVersionName = pInfo.versionName;
 
@@ -121,7 +131,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(this, "앱의 버전 정보를 얻어오지 못했습니다.",Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "앱의 버전 정보를 얻어오지 못했습니다.", Toast.LENGTH_SHORT).show();
             shutDown();
         }
 
@@ -135,6 +145,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             setAccessibilityPermissions();
             Toast.makeText(this, "이 앱을 이용하기 위해선 접근성 권한이 필요합니다.", Toast.LENGTH_SHORT).show();
         }
+
+        logOutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AuthUI.getInstance()
+                        .signOut(getApplicationContext())
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            public void onComplete(@NonNull Task<Void> task) {
+                                shutDown();
+                            }
+                        });
+            }
+        });
     }
 
     @Override
@@ -186,23 +209,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }).create().show();
     }
 
-    private void compareVersion(String android){
+    private void compareVersion(String android) {
         isLoading.setValue(true);
         DatabaseReference mDatabase = FirebaseDatabase.getInstance(REF).getReference(APPVERSION);
         mDatabase.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DataSnapshot> task) {
-                if(task.isSuccessful()){
+                if (task.isSuccessful()) {
                     String latestVersion = (String) task.getResult().getValue();
                     Log.d(TAG, "latestVersion : " + latestVersion);
-                    if(!latestVersion.equals(myVersionName)){
-                        Toast.makeText(getApplicationContext(), "앱을 최신버전으로 업데이트 해주세요",Toast.LENGTH_SHORT).show();
+                    if (!latestVersion.equals(myVersionName)) {
+                        Toast.makeText(getApplicationContext(), "앱을 최신버전으로 업데이트 해주세요", Toast.LENGTH_SHORT).show();
                         shutDown();
-                    }else{
+                    } else {
                         getRemainingDate(android);
                     }
-                }else{
-                    Toast.makeText(getApplicationContext(), "server connection error",Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "server connection error", Toast.LENGTH_SHORT).show();
                     shutDown();
                 }
             }
@@ -222,17 +245,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 String mday = mUser.getDate();
                 String mandroid = mUser.getAndroid();
                 boolean isLimit = mUser.isLimit();
-                if(isLimit){
-                    Toast.makeText(getApplicationContext(), "부정 이용으로 이용이 제한된 계정입니다.",Toast.LENGTH_SHORT).show();
+                if (isLimit) {
+                    Toast.makeText(getApplicationContext(), "부정 이용으로 이용이 제한된 계정입니다.", Toast.LENGTH_SHORT).show();
                     shutDown();
                 }
 
-                if(mandroid.equals("")){
+                if (mandroid.equals("")) {
                     mDatabase.child(user.getUid()).child("android").setValue(android);
-                }else if(!mandroid.equals(android)){
-                    Toast.makeText(getApplicationContext(), "중복로그인으로 이용을 제한합니다.",Toast.LENGTH_SHORT).show();
+                } else if (!mandroid.equals(android)) {
+                    Toast.makeText(getApplicationContext(), "중복로그인으로 이용을 제한합니다.", Toast.LENGTH_SHORT).show();
                     shutDown();
                 }
+
+                //접속 시간 세팅
+                mDatabase.child(user.getUid()).child("access").setValue(getCurrentDate_yyyyMMdd_hhmmss());
 
                 String[] mdaylist = mday.split("-");
                 int year = Integer.parseInt(mdaylist[0]);
@@ -243,10 +269,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 cal.set(year, month - 1, day);
                 long birthTime = cal.getTimeInMillis() / (1000 * 60 * 60 * 24);
                 interval = (int) (birthTime - currentTime);
-                if(interval < 0){
+                if (interval < 0) {
                     startButton.setEnabled(false);
+                    txt_date.setText("다음 결제일만료: D+" + String.valueOf(Math.abs(interval)));
+                    txt_date.setTextColor(getResources().getColor(R.color.purple_700));
+                } else {
+                    txt_date.setText("다음 결제일까지 : D-" + String.valueOf(interval));
                 }
-                txt_date.setText("다음 결제일까지 : D-" + String.valueOf(interval));
                 this.isLoading.setValue(false);
             } else {
                 Log.d(TAG, "task failed");
@@ -281,8 +310,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private void shutDown(){
-        moveTaskToBack(true);						// 태스크를 백그라운드로 이동
+    public String getCurrentDate_yyyyMMdd_hhmmss() {
+        Date currentTime = Calendar.getInstance().getTime();
+        SimpleDateFormat format = new SimpleDateFormat(format_yyyyMMdd_HHmmss, Locale.getDefault());
+        return format.format(currentTime);
+    }
+
+
+    private void shutDown() {
+        moveTaskToBack(true);                        // 태스크를 백그라운드로 이동
         finishAndRemoveTask();// 액티비티 종료 + 태스크 리스트에서 지우기
         stopService(new Intent(MainActivity.this, FloatingView.class));
         android.os.Process.killProcess(android.os.Process.myPid());

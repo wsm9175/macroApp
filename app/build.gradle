@@ -3,6 +3,14 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        release {
+            storeFile file('C:\\Users\\seongminWoo\\Desktop\\Project\\quickJob.jks')
+            storePassword 'quickJob'
+            keyAlias 'key0'
+            keyPassword 'quickJob'
+        }
+    }
     compileSdk 32
 
     defaultConfig {
@@ -19,7 +27,9 @@ android {
         release {
             minifyEnabled true
             shrinkResources true
+            debuggable true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
         applicationVariants.all { variant ->
             variant.outputs.all { def name = parent.project.getName()

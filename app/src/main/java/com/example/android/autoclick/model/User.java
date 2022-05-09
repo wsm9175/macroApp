@@ -5,6 +5,7 @@ public class User {
     private String location;
     private boolean isLimit;
     private String android;
+    private String access;
 
     public String getAndroid() {
         return android;
@@ -38,5 +39,13 @@ public class User {
 
     public void setLimit(boolean limit) {
         isLimit = limit;
+    }
+
+    public String getAccess() {
+        return access;
+    }
+
+    public void setAccess(String access) {
+        this.access = access;
     }
 }
