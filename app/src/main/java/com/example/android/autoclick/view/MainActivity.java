@@ -2,12 +2,15 @@ package com.example.android.autoclick.view;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.MutableLiveData;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,6 +18,8 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
+import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,9 +44,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //FrameLayout mLayout;
     private final String TAG = MainActivity.class.getSimpleName();
     private static final int SYSTEM_ALERT_WINDOW_PERMISSION = 2084;
-    private static int interval=0;
+    private static int interval = 0;
     private static TextView txt_date;
+    private Button startButton;
+    private ProgressBar progressBar;
 
+    private PackageInfo pInfo = null;
+    private String myVersionName;
+    private int myVersionCode;
+
+    private MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
+    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    private FirebaseUser user = mAuth.getCurrentUser();
+    private final String REF = "https://quickjob-c9ee7-default-rtdb.asia-southeast1.firebasedatabase.app";
+    private final String APPVERSION = "appversion";
     private final String USER = "user";
     private final String DATE = "date";
     private final String LOCATION = "location";
@@ -50,8 +66,49 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         txt_date = findViewById(R.id.txt_date);
-        getRemainingDate();
+        startButton = findViewById(R.id.startFloat);
+
+        startButton.setOnClickListener(this);
+
+        this.isLoading.setValue(false);
+        this.progressBar = findViewById(R.id.progress1);
+        this.progressBar.bringToFront();
+        this.startButton.setVisibility(View.INVISIBLE);
+        this.progressBar.setVisibility(View.INVISIBLE);
+
+        this.mAuth = FirebaseAuth.getInstance();
+        this.user = mAuth.getCurrentUser();
+
+        this.isLoading.observe(this, data -> {
+            if (isLoading.getValue()) {
+                this.progressBar.setVisibility(View.VISIBLE);
+                this.startButton.setVisibility(View.INVISIBLE);
+            }else{
+                this.progressBar.setVisibility(View.INVISIBLE);
+                this.startButton.setVisibility(View.VISIBLE);
+            }
+        });
+
+        // 패키지 정보를 받아와 서버의 앱 버전과 비교. 버전 불일치시 업데이트 요청 후 종료
+        try {
+            pInfo = getApplication().getPackageManager().getPackageInfo(getApplicationContext().getPackageName(), PackageManager.GET_META_DATA);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+              myVersionCode = (int) pInfo.getLongVersionCode();
+            }
+            myVersionName = pInfo.versionName;
+
+            Log.d(TAG, "myVersionCode : " + myVersionCode);
+            Log.d(TAG, "myVersionName : " + myVersionName);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "앱의 버전 정보를 얻어오지 못했습니다.",Toast.LENGTH_SHORT).show();
+            shutDown();
+        }
+        compareVersion();
+
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
             Toast.makeText(this, "이 앱을 이용하기 위해선 다른 앱 위에 표시 권한이 필요합니다.", Toast.LENGTH_SHORT).show();
@@ -61,7 +118,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             setAccessibilityPermissions();
             Toast.makeText(this, "이 앱을 이용하기 위해선 접근성 권한이 필요합니다.", Toast.LENGTH_SHORT).show();
         }
-        findViewById(R.id.startFloat).setOnClickListener(this);
 
     }
 
@@ -105,13 +161,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }).create().show();
     }
 
+    private void compareVersion(){
+        isLoading.setValue(true);
+        DatabaseReference mDatabase = FirebaseDatabase.getInstance(REF).getReference(APPVERSION);
+        mDatabase.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DataSnapshot> task) {
+                if(task.isSuccessful()){
+                    String latestVersion = (String) task.getResult().getValue();
+                    Log.d(TAG, "latestVersion : " + latestVersion);
+                    if(!latestVersion.equals(myVersionName)){
+                        Toast.makeText(getApplicationContext(), "앱을 최신버전으로 업데이트 해주세요",Toast.LENGTH_SHORT).show();
+                        shutDown();
+                    }else{
+                        getRemainingDate();
+                    }
+                }else{
+                    Toast.makeText(getApplicationContext(), "server connection error",Toast.LENGTH_SHORT).show();
+                    shutDown();
+                }
+            }
+        });
+    }
+
     // 결제 남은 날짜를 계산
     private void getRemainingDate() {
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        FirebaseUser user = mAuth.getCurrentUser();
-//        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference("user");
-        DatabaseReference mDatabase = FirebaseDatabase.getInstance("https://quickjob-c9ee7-default-rtdb.asia-southeast1.firebasedatabase.app").getReference("user");
-        Log.d(TAG, mDatabase + " "+user.getUid());
+        DatabaseReference mDatabase = FirebaseDatabase.getInstance(REF).getReference(USER);
+        Log.d(TAG, mDatabase + " " + user.getUid());
         mDatabase.child(user.getUid()).get().addOnCompleteListener(task -> {
             Log.d(TAG, String.valueOf(task.isSuccessful()));
             if (task.isSuccessful()) {
@@ -120,20 +196,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 User mUser = task.getResult().getValue(User.class);
                 String mday = mUser.getDate();
                 String[] mdaylist = mday.split("-");
-//                int first = mday.indexOf("-");
-//                int last = mday.indexOf("-");
                 int year = Integer.parseInt(mdaylist[0]);
                 int month = Integer.parseInt(mdaylist[1]);
                 int day = Integer.parseInt(mdaylist[2]);
                 GregorianCalendar cal = new GregorianCalendar();
-                long currentTime = cal.getTimeInMillis()/(1000*60*60*24);
-                cal.set(year,month-1,day);
-                long birthTime = cal.getTimeInMillis()/(1000*60*60*24);
-                interval =(int)(birthTime-currentTime);
-                txt_date.setText(String.valueOf(interval));
-            }else{
+                long currentTime = cal.getTimeInMillis() / (1000 * 60 * 60 * 24);
+                cal.set(year, month - 1, day);
+                long birthTime = cal.getTimeInMillis() / (1000 * 60 * 60 * 24);
+                interval = (int) (birthTime - currentTime);
+                txt_date.setText("다음 결제일까지 : D-" + String.valueOf(interval));
+                this.isLoading.setValue(false);
+            } else {
                 Log.d(TAG, "task failed");
                 task.getException().printStackTrace();
+                this.isLoading.setValue(false);
             }
         });
     }
@@ -161,5 +237,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 setAccessibilityPermissions();
             }
         }
+    }
+
+    private void shutDown(){
+        moveTaskToBack(true);						// 태스크를 백그라운드로 이동
+        finishAndRemoveTask();						// 액티비티 종료 + 태스크 리스트에서 지우기
+        android.os.Process.killProcess(android.os.Process.myPid());
     }
 }

@@ -62,11 +62,13 @@ public class AutoService extends AccessibilityService {
 
     @Override
     public void onInterrupt() {
+        Log.d(TAG, "onInterrupt");
     }
 
 
     @Override
     protected void onServiceConnected() {
+        Log.d(TAG, "onServiceConnected");
 
     }
 
