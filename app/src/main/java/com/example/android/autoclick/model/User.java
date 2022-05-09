@@ -4,8 +4,17 @@ public class User {
     private String date;
     private String location;
     private boolean isLimit;
+    private String android;
+
+    public String getAndroid() {
+        return android;
+    }
 
     public User(){}
+
+    public void setAndroid(String android) {
+        this.android = android;
+    }
 
     public String getDate() {
         return date;
