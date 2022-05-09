@@ -25,6 +25,7 @@
             android:layout_weight="1" />
 
         <Switch
+            android:longClickable="true"
             android:id="@+id/onoff"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

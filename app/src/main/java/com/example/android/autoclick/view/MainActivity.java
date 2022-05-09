@@ -282,10 +282,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void shutDown(){
-        moveTaskToBack(true);                  // 태스크를 백그라운드로 이동
-        finishAndRemoveTask();                  // 액티비티 종료 + 태스크 리스트에서 지우기
+        moveTaskToBack(true);						// 태스크를 백그라운드로 이동
+        finishAndRemoveTask();// 액티비티 종료 + 태스크 리스트에서 지우기
+        stopService(new Intent(MainActivity.this, FloatingView.class));
         android.os.Process.killProcess(android.os.Process.myPid());
-        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-        getApplication().stopService(intent);
     }
 }

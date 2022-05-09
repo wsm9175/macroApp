@@ -142,6 +142,7 @@ public class FloatingView extends Service implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
+        stopSelf();
         System.exit(0);
     }
 
